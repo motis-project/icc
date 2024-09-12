@@ -3,6 +3,7 @@
 #include "utl/concat.h"
 #include "utl/enumerate.h"
 
+#include "osr/platforms.h"
 #include "osr/routing/route.h"
 
 #include "geo/polyline_format.h"
