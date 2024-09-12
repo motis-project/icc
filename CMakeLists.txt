@@ -1,5 +1,16 @@
 cmake_minimum_required(VERSION 3.20)
+
 project(icc)
+
+if(NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
+    if(ICC_MIMALLOC)
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+        set(protobuf_MSVC_STATIC_RUNTIME OFF)
+    else()
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+        set(protobuf_MSVC_STATIC_RUNTIME ON)
+    endif()
+endif()
 
 include(cmake/buildcache.cmake)
 include(cmake/pkg.cmake)
