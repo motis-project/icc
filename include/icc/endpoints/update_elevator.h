@@ -28,8 +28,4 @@ struct update_elevator {
   std::shared_ptr<rt>& rt_;
 };
 
-static_assert(utl::detail::arity<update_elevator>() == 8U);
-static_assert(utl::detail::is_brace_constructible<update_elevator, 8U>());
-static_assert(!utl::detail::is_brace_constructible<update_elevator, 9U>());
-
 }  // namespace icc::ep
