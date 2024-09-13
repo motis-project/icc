@@ -1,5 +1,7 @@
 #include "icc/journey_to_response.h"
 
+#include <cmath>
+
 #include "utl/concat.h"
 #include "utl/enumerate.h"
 
@@ -193,7 +195,7 @@ api::Itinerary journey_to_response(
       .startTime_ = to_ms(j.legs_.front().dep_time_),
       .endTime_ = to_ms(j.legs_.back().arr_time_),
       .transfers_ = std::max(
-          0LL, utl::count_if(j.legs_, [](auto&& leg) {
+          0L, utl::count_if(j.legs_, [](auto&& leg) {
                 return holds_alternative<n::routing::journey::run_enter_exit>(
                     leg.uses_);
               }) - 1)};
