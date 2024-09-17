@@ -304,12 +304,16 @@ components:
     Area:
       description: Administrative area
       type: object
+      required:
+        - name
+        - admin_level
+        - matched
       properties:
         name:
           type: string
           description: Name of the area
         admin_level:
-          type: string
+          type: number
           description: |
             [OpenStreetMap `admin_level`](https://wiki.openstreetmap.org/wiki/Key:admin_level)
             of the area
@@ -333,8 +337,10 @@ components:
         - name
         - id
         - lat
-        - lng
+        - lon
         - tokens
+        - areas
+        - zip
       properties:
         type:
           description: location type
@@ -362,8 +368,8 @@ components:
         street:
           description: street name
           type: string
-        housenumber:
-          description: housenumber
+        house_number:
+          description: house number
           type: string
         zip:
           description: zip code
