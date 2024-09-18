@@ -9,15 +9,15 @@
 [osr]
   url=git@github.com:motis-project/osr.git
   branch=master
-  commit=403ded1d4f0622357f3e37d1e616f462aac05ff8
+  commit=9bf3625ecf01af3f4071bfadb5d9775a06fe6f76
 [utl]
   url=git@github.com:motis-project/utl.git
   branch=master
-  commit=cbbd0b2d3a95e1bc6402e8162c8abb3f6ade44a4
+  commit=d5279b4f6fb64b4dae242e53ee350f8d413edf2a
 [adr]
   url=git@github.com:triptix-tech/adr.git
   branch=master
-  commit=a3fa5686a704a3d99e154e8332c05942b9b37304
+  commit=0c6652c5e275cd642d4135dbc9dc0a9df0c3d2dc
 [googletest]
   url=git@github.com:motis-project/googletest.git
   branch=master
