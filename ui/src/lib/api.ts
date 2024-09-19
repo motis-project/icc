@@ -44,6 +44,7 @@ export type Elevator = {
 };
 
 const post = async (path: string, req: any) => {
+	console.log(`FETCH ${path}: ${JSON.stringify(req)}`);
 	const response = await fetch(`${baseUrl}${path}`, {
 		method: 'POST',
 		mode: 'cors',

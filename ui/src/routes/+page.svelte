@@ -52,7 +52,7 @@
 	import DateInput from '$lib/DateInput.svelte';
 	import * as RadioGroup from '$lib/components/ui/radio-group/index.js';
 	import ComboBox from '$lib/ComboBox.svelte';
-	import { Selected } from 'bits-ui';
+	import { type Selected } from 'bits-ui';
 
 	let zoom = $state(18);
 	let bounds = $state<undefined | maplibregl.LngLatBounds>(undefined);
@@ -70,7 +70,6 @@
 	$effect(async () => {
 		platforms = showPlatforms && bounds ? getPlatforms(bounds, level) : null;
 	});
-	$inspect(showPlatforms, platforms);
 
 	let showGraph = $state(false);
 	let graph = $state<null | any>(null);
