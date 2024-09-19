@@ -377,7 +377,7 @@
 				</div>
 			{:else}
 				<div class="flex flex-col w-full">
-					<div class="flex flex-col space-y-4 p-4 shadow-md rounded bg-gray-50">
+					<div class="flex flex-col space-y-4 p-4 shadow-md rounded bg-neutral-50">
 						<ComboBox
 							name="from"
 							inputClass="w-full bg-white"
