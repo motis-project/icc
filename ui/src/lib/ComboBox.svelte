@@ -70,26 +70,26 @@
 			aria-label={placeholder}
 		/>
 	</div>
-	<Combobox.Content
-		sideOffset={12}
-		class="relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md outline-none"
-	>
-		{#each items as item (item.value)}
-			<Combobox.Item
-				class="relative flex w-full cursor-default select-none items-center rounded-sm py-2 pl-4 pr-2 text-sm outline-none data-[disabled]:pointer-events-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[disabled]:opacity-50"
-				value={item.value}
-				label={item.label}
-			>
-				<span class="font-semibold text-nowrap text-ellipsis overflow-hidden">
-					{item.value.name}
-				</span>
-				<span class="ml-2 text-muted-foreground text-nowrap text-ellipsis overflow-hidden">
-					{item.area}
-				</span>
-			</Combobox.Item>
-		{:else}
-			<span class="block px-5 py-2 text-sm text-muted-foreground"> No results found </span>
-		{/each}
-	</Combobox.Content>
+	{#if items.length !== 0}
+		<Combobox.Content
+			sideOffset={12}
+			class="relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md outline-none"
+		>
+			{#each items as item (item.value)}
+				<Combobox.Item
+					class="relative flex w-full cursor-default select-none items-center rounded-sm py-2 pl-4 pr-2 text-sm outline-none data-[disabled]:pointer-events-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[disabled]:opacity-50"
+					value={item.value}
+					label={item.label}
+				>
+					<span class="font-semibold text-nowrap text-ellipsis overflow-hidden">
+						{item.value.name}
+					</span>
+					<span class="ml-2 text-muted-foreground text-nowrap text-ellipsis overflow-hidden">
+						{item.area}
+					</span>
+				</Combobox.Item>
+			{/each}
+		</Combobox.Content>
+	{/if}
 	<Combobox.HiddenInput {name} />
 </Combobox.Root>

@@ -462,7 +462,7 @@
 												routingResponses.splice(
 													0,
 													0,
-													plan({ ...baseQuery, pageCursor: r.previousPageCursor })
+													plan({query: { ...baseQuery, pageCursor: r.previousPageCursor }}).then(x => x.data!)
 												);
 											}}
 											class="px-2 py-1 bg-blue-600 hover:!bg-blue-700 text-white font-bold border rounded-lg"
@@ -531,7 +531,7 @@
 										<div class="border-t w-full h-0"></div>
 										<button
 											onclick={() => {
-												routingResponses.push(plan({ ...baseQuery, pageCursor: r.nextPageCursor }));
+												routingResponses.push(plan({query: { ...baseQuery, pageCursor: r.nextPageCursor }}).then((x) => x.data!));
 											}}
 											class="px-2 py-1 bg-blue-600 hover:!bg-blue-700 text-white font-bold border rounded-lg"
 										>
