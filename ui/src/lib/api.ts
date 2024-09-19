@@ -1,6 +1,6 @@
 import maplibregl from 'maplibre-gl';
 
-const baseUrl = 'http://localhost:8000';
+const baseUrl = 'http://localhost:7999';
 
 export class Location {
 	lat!: number;
@@ -54,7 +54,7 @@ const post = async (path: string, req: any) => {
 		body: JSON.stringify(req)
 	});
 	return await response.json();
-}
+};
 
 export const getPlatforms = async (bounds: maplibregl.LngLatBounds, level: number) => {
 	return await post('/api/platforms', {
@@ -88,10 +88,10 @@ export const getElevators = async (bounds: maplibregl.LngLatBounds) => {
 	return await post('/api/elevators', bounds.toArray().flat());
 };
 
-export const getFootpaths = async (station: { id: string, src: number }): Promise<Footpaths> => {
+export const getFootpaths = async (station: { id: string; src: number }): Promise<Footpaths> => {
 	return await post('/api/footpaths', station);
-}
+};
 
 export const updateElevator = async (elevator: Elevator) => {
 	return await post('/api/update_elevator', elevator);
-}
+};
