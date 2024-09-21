@@ -55,9 +55,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install ninja
-        run: choco install ninja
-
       - name: Restore buildcache Cache
         uses: actions/cache/restore@v3
         id: restore-buildcache
