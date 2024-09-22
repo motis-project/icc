@@ -124,6 +124,7 @@ void adr_extend_tt(nigiri::timetable const& tt,
   for (auto const& [prio, l] : utl::zip(importance, place_location)) {
     auto const str_idx = a::string_idx_t{t.strings_.size()};
     auto const place_idx = a::place_idx_t{t.place_names_.size()};
+    t.place_type_.emplace_back(a::place_type::kExtra);
     t.strings_.emplace_back(tt.locations_.names_[l].view());
     t.place_names_.emplace_back(
         std::initializer_list<a::string_idx_t>{str_idx});

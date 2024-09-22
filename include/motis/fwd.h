@@ -1,6 +1,7 @@
 #pragma once
 
 namespace adr {
+struct reverse;
 struct area_database;
 struct typeahead;
 struct cache;
