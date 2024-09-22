@@ -21,9 +21,10 @@
 
 	const language = browser ? navigator.languages.find((l) => l.length == 2) : '';
 
-	type Item = { label: string; value: Match; area: string };
+	type Item = { label: string; value: Match; area: string | undefined };
 
 	let items = $state.raw<Array<Item>>([]);
+	$inspect(items);
 	const updateGuesses = async () => {
 		items = (
 			await geocode<true>({
@@ -35,11 +36,11 @@
 			if (matchedArea?.name.match(/^[0-9]*$/)) {
 				matchedArea.name += ' ' + defaultArea?.name;
 			}
-			let area = (matchedArea ?? defaultArea)!.name;
+			let area = (matchedArea ?? defaultArea)?.name;
 			if (area == match.name) {
 				area = match.areas[0]!.name;
 			}
-			return { label: match.name + ', ' + area, area, value: match };
+			return { label: area ? match.name + ', ' + area : match.name, area, value: match };
 		});
 		const shown = new Set<string>();
 		items = items.filter((x) => {

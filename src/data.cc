@@ -32,8 +32,8 @@ data::~data() = default;
 void data::load(std::filesystem::path const& p, data& d) {
   d.rt_ = std::make_shared<rt>();
 
-  if (fs::is_regular_file(p / "adr.cista.t.adr")) {
-    d.t_ = adr::read(p / "adr.cista.t.adr", false);
+  if (fs::is_regular_file(p / "adr" / "t.bin")) {
+    d.t_ = adr::read(p / "adr" / "t.bin", false);
     d.tc_ = std::make_unique<adr::cache>(d.t_->strings_.size(), 100U);
   } else {
     fmt::println("{} not found -> not loading geo coder", p / "adr.bin");
