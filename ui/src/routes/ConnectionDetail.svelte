@@ -1,16 +1,16 @@
 <script lang="ts">
 	import ArrowRight from 'lucide-svelte/icons/arrow-right';
 	import type { Itinerary, Mode } from '$lib/openapi';
-	import Time from './Time.svelte';
+	import Time from '../lib/Time.svelte';
 	import { routeBorderColor, routeColor } from '$lib/modeStyle';
 	import { getModeStyle } from '$lib/modeStyle';
 	import { formatDurationSec } from '$lib/formatDuration';
 
-	class Props {
-		itinerary!: Itinerary;
-	}
-
-	let { itinerary }: Props = $props();
+	const {
+		itinerary
+	}: {
+		itinerary: Itinerary;
+	} = $props();
 
 	const lastLeg = itinerary.legs.findLast((l) => l.duration !== 0);
 </script>
