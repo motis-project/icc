@@ -13,7 +13,7 @@
 		transformRequest,
 		center,
 		children,
-		className
+		class: className
 	}: {
 		map?: maplibregl.Map;
 		style: maplibregl.StyleSpecification;
@@ -21,8 +21,8 @@
 		center: maplibregl.LngLatLike;
 		bounds?: maplibregl.LngLatBoundsLike | undefined;
 		zoom: number;
-		children: Snippet;
-		className: string;
+		children?: Snippet;
+		class: string;
 	} = $props();
 
 	let currStyle: maplibregl.StyleSpecification | null = null;
@@ -75,5 +75,7 @@
 </script>
 
 <div use:createMap class={className}>
-	{@render children()}
+	{#if children}
+		{@render children()}
+	{/if}
 </div>

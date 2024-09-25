@@ -6,17 +6,19 @@
 	import Bus from 'lucide-svelte/icons/bus-front';
 	import House from 'lucide-svelte/icons/map-pin-house';
 	import Place from 'lucide-svelte/icons/map-pin';
+	import type { Location } from './Location';
+	import { GEOCODER_PRECISION } from './Precision';
 
 	let {
+		value = $bindable(),
 		placeholder,
-		inputClass,
-		name,
-		onSelectedChange
+		class: className,
+		name
 	}: {
+		value: Location;
 		placeholder: string | undefined;
-		inputClass: string | undefined;
+		class: string | undefined;
 		name: string | undefined;
-		onSelectedChange: ((match: Selected<Match> | undefined) => void) | undefined;
 	} = $props();
 
 	let inputValue = $state('');
@@ -26,6 +28,19 @@
 
 	type Item = { label: string; value: Match; area: string | undefined };
 
+	const getDisplayArea = (match: Match) => {
+		const matchedArea = match.areas.find((a) => a.matched);
+		const defaultArea = match.areas.find((a) => a.default);
+		if (matchedArea?.name.match(/^[0-9]*$/)) {
+			matchedArea.name += ' ' + defaultArea?.name;
+		}
+		let area = (matchedArea ?? defaultArea)?.name;
+		if (area == match.name) {
+			area = match.areas[0]!.name;
+		}
+		return area;
+	};
+
 	let items = $state.raw<Array<Item>>([]);
 	$inspect(items);
 	const updateGuesses = async () => {
@@ -34,16 +49,12 @@
 				query: { text: inputValue, language }
 			})
 		).data.map((match) => {
-			const matchedArea = match.areas.find((a) => a.matched);
-			const defaultArea = match.areas.find((a) => a.default);
-			if (matchedArea?.name.match(/^[0-9]*$/)) {
-				matchedArea.name += ' ' + defaultArea?.name;
-			}
-			let area = (matchedArea ?? defaultArea)?.name;
-			if (area == match.name) {
-				area = match.areas[0]!.name;
-			}
-			return { label: area ? match.name + ', ' + area : match.name, area, value: match };
+			const displayArea = getDisplayArea(match);
+			return {
+				label: displayArea ? match.name + ', ' + displayArea : match.name,
+				area: displayArea,
+				value: match
+			};
 		});
 		const shown = new Set<string>();
 		items = items.filter((x) => {
@@ -64,10 +75,18 @@
 			}, 150);
 		}
 	});
+
+	const onSelectedChange = (selected: Selected<Match> | undefined) => {
+		if (selected) {
+			value.match = selected.value;
+			value.precision = GEOCODER_PRECISION;
+			value.level = 0;
+		}
+	};
 </script>
 
 <Combobox.Root {items} bind:inputValue bind:touchedInput {onSelectedChange}>
-	<div class={cn('relative', inputClass)}>
+	<div class={cn('relative', className)}>
 		<Combobox.Input
 			class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
 			{placeholder}

@@ -1,15 +1,25 @@
 <script lang="ts">
+	import { getStyle } from '$lib/map/style';
+	import Map from '$lib/map/Map.svelte';
 	import Control from '$lib/map/Control.svelte';
+	import SearchMask from './SearchMask.svelte';
+	import { Card } from '$lib/components/ui/card';
 
+	let level = $state(0);
 	let zoom = $state(18);
-	let bounds = $state<undefined | maplibregl.LngLatBounds>(undefined);
-	let map = $state<null | maplibregl.Map>(null);
+	let bounds = $state<maplibregl.LngLatBoundsLike | undefined>(undefined);
+	let map = $state<maplibregl.Map | undefined>(undefined);
+
+	let from = $state<Location>();
+	let to = $state<Location>();
+	let dateTime = $state<Date>(new Date());
+	let timeType = $state<string>('departure');
 </script>
 
 <Map
 	bind:map
 	bind:bounds
-	{zoom}
+	bind:zoom
 	transformRequest={(url: string, _: any) => {
 		if (url.startsWith('/')) {
 			return { url: `https://europe.motis-project.de/tiles${url}` };
@@ -19,7 +29,9 @@
 	class="h-screen"
 	style={getStyle(level)}
 >
-	<Control>
-		<SearchMask />
+	<Control position="top-left">
+		<Card class="w-[500px] max-h-[90vh] overflow-y-auto overflow-x-hidden bg-white rounded-lg">
+			<SearchMask {from} {to} {dateTime} {timeType} />
+		</Card>
 	</Control>
 </Map>
