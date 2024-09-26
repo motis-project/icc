@@ -14,6 +14,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        working-directory: ui
+        run: npm install -f
+
+      - name: Code Lint
+        working-directory: ui
+        run: npm run lint
+
+      - name: Svelte Check
+        working-directory: ui
+        run: npm run check
+
   formatting:
     runs-on: ubuntu-latest
     container: ghcr.io/motis-project/docker-cpp-build

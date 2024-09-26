@@ -44,7 +44,7 @@
 
 		if (!l) {
 			console.log('ADD LAYER', source.id, id, type, filter, layout, paint);
-			// @ts-ignore type not assignable
+			// @ts-expect-error not assignable
 			ctx.map!.addLayer({
 				source: source.id,
 				id,

@@ -12,11 +12,12 @@
 	import ConnectionDetail from './ConnectionDetail.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import ItineraryGeoJson from './ItineraryGeoJSON.svelte';
+	import maplibregl from 'maplibre-gl';
 
 	let level = $state(0);
 	let zoom = $state(18);
-	let bounds = $state<maplibregl.LngLatBoundsLike | undefined>(undefined);
-	let map = $state<maplibregl.Map | undefined>(undefined);
+	let bounds = $state<maplibregl.LngLatBoundsLike>();
+	let map = $state<maplibregl.Map>();
 
 	let from = $state<Location>();
 	let to = $state<Location>();
@@ -48,14 +49,14 @@
 		}
 	});
 
-	let selectedItinerary = $state<Itinerary | undefined>();
+	let selectedItinerary = $state<Itinerary>();
 </script>
 
 <Map
 	bind:map
 	bind:bounds
 	bind:zoom
-	transformRequest={(url: string, _: any) => {
+	transformRequest={(url: string) => {
 		if (url.startsWith('/')) {
 			return { url: `https://europe.motis-project.de/tiles${url}` };
 		}

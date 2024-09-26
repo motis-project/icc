@@ -45,11 +45,7 @@
 					<div class="border-t w-full h-0"></div>
 				</div>
 			{/if}
-			{#each r.itineraries as it, i}
-				{@const date = new Date(it.startTime).toLocaleDateString()}
-				{@const predDate = new Date(
-					r.itineraries[i == 0 ? 0 : i - 1].startTime
-				).toLocaleDateString()}
+			{#each r.itineraries as it}
 				<button
 					onclick={() => {
 						selectedItinerary = it;
