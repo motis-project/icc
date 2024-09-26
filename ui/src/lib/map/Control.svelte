@@ -36,7 +36,12 @@
 	onDestroy(() => ctx.map?.removeControl(ctrl));
 </script>
 
-<div class:hidden={!initialized} class="maplibregl-ctrl" {...props} bind:this={el}>
+<div
+	class:hidden={!initialized}
+	class="clear-both pointer-events-auto p-4"
+	{...props}
+	bind:this={el}
+>
 	{#if children}
 		{@render children()}
 	{/if}

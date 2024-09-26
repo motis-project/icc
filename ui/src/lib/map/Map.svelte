@@ -47,6 +47,14 @@
 			})
 		);
 
+		map.addImage(
+			'shield-dark',
+			...createShield({
+				fill: 'hsl(0, 0%, 16%)',
+				stroke: 'hsl(0, 0%, 30%)'
+			})
+		);
+
 		map.on('load', () => {
 			currStyle = style;
 			ctx.map = map;

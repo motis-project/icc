@@ -2,7 +2,7 @@
 	import ArrowRight from 'lucide-svelte/icons/arrow-right';
 	import type { Itinerary } from '$lib/openapi';
 	import Time from '../lib/Time.svelte';
-	import { routeBorderColor, routeColor } from '$lib/modeStyle';
+	import { getColor, routeBorderColor, routeColor } from '$lib/modeStyle';
 	import { getModeStyle } from '$lib/modeStyle';
 	import { formatDurationSec } from '$lib/formatDuration';
 
@@ -104,7 +104,7 @@
 		{:else if !(isLast && l.duration === 0) && ((i == 0 && l.duration !== 0) || !next || !next.routeShortName)}
 			<div class="w-full flex justify-between items-center space-x-1">
 				<div>
-					<svg class="relative left-[7px] w-6 h-6 fill-white rounded-full bg-black p-1">
+					<svg class="relative left-[7px] w-6 h-6 fill-background rounded-full bg-foreground p-1">
 						<use xlink:href={`#${modeIcon}`}></use>
 					</svg>
 				</div>

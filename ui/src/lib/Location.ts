@@ -1,7 +1,10 @@
 import type { Match } from './openapi';
 
 export type Location = {
-	match?: Match;
-	level?: number;
-	precision?: number;
+	label?: string;
+	value: {
+		match?: Match;
+		precision?: number;
+		level?: number;
+	};
 };

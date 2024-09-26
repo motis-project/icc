@@ -10,15 +10,19 @@
 	import { GEOCODER_PRECISION } from './Precision';
 
 	let {
-		value = $bindable(),
+		items = $bindable([]),
+		selected = $bindable(),
 		placeholder,
 		class: className,
-		name
+		name,
+		theme
 	}: {
-		value: Location | undefined;
-		placeholder: string | undefined;
-		class: string | undefined;
-		name: string | undefined;
+		items?: Array<Location>;
+		selected: Location;
+		placeholder?: string;
+		class?: string;
+		name?: string;
+		theme?: 'light' | 'dark';
 	} = $props();
 
 	let inputValue = $state('');
@@ -26,41 +30,44 @@
 
 	const language = browser ? navigator.languages.find((l) => l.length == 2) : '';
 
-	type Item = { label: string; value: Match; area: string | undefined };
-
-	const getDisplayArea = (match: Match) => {
-		const matchedArea = match.areas.find((a) => a.matched);
-		const defaultArea = match.areas.find((a) => a.default);
-		if (matchedArea?.name.match(/^[0-9]*$/)) {
-			matchedArea.name += ' ' + defaultArea?.name;
+	const getDisplayArea = (match: Match | undefined) => {
+		if (match) {
+			const matchedArea = match.areas.find((a) => a.matched);
+			const defaultArea = match.areas.find((a) => a.default);
+			if (matchedArea?.name.match(/^[0-9]*$/)) {
+				matchedArea.name += ' ' + defaultArea?.name;
+			}
+			let area = (matchedArea ?? defaultArea)?.name;
+			if (area == match.name) {
+				area = match.areas[0]!.name;
+			}
+			return area;
 		}
-		let area = (matchedArea ?? defaultArea)?.name;
-		if (area == match.name) {
-			area = match.areas[0]!.name;
-		}
-		return area;
+		return '';
 	};
 
-	let items = $state.raw<Array<Item>>([]);
+	const getLabel = (match: Match) => {
+		const displayArea = getDisplayArea(match);
+		return displayArea ? match.name + ', ' + displayArea : match.name;
+	};
+
 	const updateGuesses = async () => {
 		items = (
 			await geocode<true>({
 				query: { text: inputValue, language }
 			})
-		).data.map((match) => {
-			const displayArea = getDisplayArea(match);
+		).data.map((match: Match): Location => {
 			return {
-				label: displayArea ? match.name + ', ' + displayArea : match.name,
-				area: displayArea,
-				value: match
+				label: getLabel(match),
+				value: { match, precision: GEOCODER_PRECISION }
 			};
 		});
 		const shown = new Set<string>();
 		items = items.filter((x) => {
-			if (shown.has(x.label)) {
+			if (shown.has(x.label!)) {
 				return false;
 			}
-			shown.add(x.label);
+			shown.add(x.label!);
 			return true;
 		});
 	};
@@ -74,19 +81,9 @@
 			}, 150);
 		}
 	});
-
-	const onSelectedChange = (selected: Selected<Match> | undefined) => {
-		if (selected) {
-			value = {
-				match: selected.value,
-				precision: GEOCODER_PRECISION,
-				level: 0
-			};
-		}
-	};
 </script>
 
-<Combobox.Root {items} bind:inputValue bind:touchedInput {onSelectedChange}>
+<Combobox.Root {items} bind:selected bind:inputValue bind:touchedInput>
 	<div class={cn('relative', className)}>
 		<Combobox.Input
 			class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
@@ -97,7 +94,10 @@
 	{#if items.length !== 0}
 		<Combobox.Content
 			sideOffset={12}
-			class="relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md outline-none"
+			class={cn(
+				'absolute z-10 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md outline-none',
+				theme
+			)}
 		>
 			{#each items as item (item.value)}
 				<Combobox.Item
@@ -105,18 +105,18 @@
 					value={item.value}
 					label={item.label}
 				>
-					{#if item.value.type == 'STOP'}
+					{#if item.value.match?.type == 'STOP'}
 						<Bus />
-					{:else if item.value.type == 'ADDRESS'}
+					{:else if item.value.match?.type == 'ADDRESS'}
 						<House />
-					{:else if item.value.type == 'PLACE'}
+					{:else if item.value.match?.type == 'PLACE'}
 						<Place />
 					{/if}
 					<span class="ml-4 font-semibold text-nowrap text-ellipsis overflow-hidden">
-						{item.value.name}
+						{item.value.match?.name}
 					</span>
 					<span class="ml-2 text-muted-foreground text-nowrap text-ellipsis overflow-hidden">
-						{item.area}
+						{getDisplayArea(item.value.match)}
 					</span>
 				</Combobox.Item>
 			{/each}
