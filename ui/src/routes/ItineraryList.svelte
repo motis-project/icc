@@ -38,7 +38,7 @@
 								)
 							);
 						}}
-						class="px-2 py-1 bg-blue-600 hover:!bg-blue-700 text-white font-bold border rounded-lg"
+						class="px-2 py-1 bg-blue-600 hover:!bg-blue-700 text-white font-bold text-sm border rounded-lg"
 					>
 						früher
 					</button>
@@ -79,7 +79,7 @@
 						<div class="mt-4 flex flex-wrap gap-x-4 gap-y-4">
 							{#each it.legs.filter((l) => l.routeShortName) as l}
 								<div
-									class="flex items-center py-1 px-2 rounded-lg font-bold h-8 text-nowrap"
+									class="flex items-center py-1 px-2 rounded-lg font-bold text-sm h-8 text-nowrap"
 									style={routeColor(l)}
 								>
 									<svg class="relative mr-1 w-4 h-4 fill-white rounded-full">
@@ -103,7 +103,7 @@
 								)
 							);
 						}}
-						class="px-2 py-1 bg-blue-600 hover:!bg-blue-700 text-white font-bold border rounded-lg"
+						class="px-2 py-1 bg-blue-600 hover:!bg-blue-700 text-white text-sm font-bold border rounded-lg"
 					>
 						später
 					</button>
