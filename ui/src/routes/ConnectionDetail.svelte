@@ -2,7 +2,7 @@
 	import ArrowRight from 'lucide-svelte/icons/arrow-right';
 	import type { Itinerary } from '$lib/openapi';
 	import Time from '../lib/Time.svelte';
-	import { getColor, routeBorderColor, routeColor } from '$lib/modeStyle';
+	import { routeBorderColor, routeColor } from '$lib/modeStyle';
 	import { getModeStyle } from '$lib/modeStyle';
 	import { formatDurationSec } from '$lib/formatDuration';
 

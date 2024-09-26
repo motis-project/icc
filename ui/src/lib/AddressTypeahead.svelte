@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Combobox, type Selected } from 'bits-ui';
+	import { Combobox } from 'bits-ui';
 	import { cn } from './utils';
 	import { geocode, type Match } from './openapi';
 	import { browser } from '$app/environment';
