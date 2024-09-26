@@ -34,6 +34,10 @@ jobs:
         working-directory: ui
         run: npm run check
 
+      - name: Build
+        working-directory: ui
+        run: npm run build
+
   formatting:
     runs-on: ubuntu-latest
     container: ghcr.io/motis-project/docker-cpp-build
