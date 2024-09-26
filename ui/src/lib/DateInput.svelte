@@ -30,7 +30,8 @@
 	)}
 	bind:this={el}
 	onchange={(e) => {
-		const dateTimeLocalValue = e.target.value;
+		// @ts-ignore target exists, value exists
+		const dateTimeLocalValue = e.target!.value!;
 		const fakeUtcTime = new Date(`${dateTimeLocalValue}Z`);
 		value = new Date(fakeUtcTime.getTime() + fakeUtcTime.getTimezoneOffset() * 60000);
 	}}

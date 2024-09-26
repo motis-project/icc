@@ -8,7 +8,7 @@
 
 	const PRECISION = 7;
 
-	function itineraryToGeoJSON(i: Itinerary) {
+	function itineraryToGeoJSON(i: Itinerary): GeoJSON.GeoJSON {
 		return {
 			type: 'FeatureCollection',
 			features: i.legs.flatMap((l) => {

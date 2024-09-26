@@ -15,7 +15,7 @@
 		class: className,
 		name
 	}: {
-		value: Location;
+		value: Location | undefined;
 		placeholder: string | undefined;
 		class: string | undefined;
 		name: string | undefined;
@@ -42,7 +42,6 @@
 	};
 
 	let items = $state.raw<Array<Item>>([]);
-	$inspect(items);
 	const updateGuesses = async () => {
 		items = (
 			await geocode<true>({

@@ -85,8 +85,8 @@
 						</summary>
 						{#each l.intermediateStops! as s}
 							<div class="flex items-center mb-6">
-								<Time class="font-semibold mr-2" timestamp={s.arrival} />
-								<Time class="font-semibold" timestamp={s.arrival} delay={l.arrivalDelay} />
+								<Time class="font-semibold mr-2" timestamp={s.arrival!} />
+								<Time class="font-semibold" timestamp={s.arrival!} delay={l.arrivalDelay} />
 								<span class="ml-8">{s.name}</span>
 							</div>
 						{/each}

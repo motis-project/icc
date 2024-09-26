@@ -1,7 +1,7 @@
-import type { Match } from "./openapi";
+import type { Match } from './openapi';
 
 export type Location = {
-  match?: Match;
-  level?: number;
-  precision?: number;
+	match?: Match;
+	level?: number;
+	precision?: number;
 };

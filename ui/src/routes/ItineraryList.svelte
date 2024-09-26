@@ -50,8 +50,7 @@
 				{@const predDate = new Date(
 					r.itineraries[i == 0 ? 0 : i - 1].startTime
 				).toLocaleDateString()}
-				<a
-					href="#"
+				<button
 					onclick={() => {
 						selectedItinerary = it;
 					}}
@@ -59,12 +58,12 @@
 					<Card class="p-4">
 						<div class="text-base h-8 flex justify-between items-center space-x-4 w-full">
 							<div>
-								<div class="text-xs font-bold uppercase text-slate-400">Departure Time</div>
+								<div class="text-xs font-bold uppercase text-slate-400">Departure</div>
 								<Time timestamp={it.startTime} />
 							</div>
 							<Separator orientation="vertical" />
 							<div>
-								<div class="text-xs font-bold uppercase text-slate-400">Arrival Time</div>
+								<div class="text-xs font-bold uppercase text-slate-400">Arrival</div>
 								<Time timestamp={it.endTime} />
 							</div>
 							<Separator orientation="vertical" />
@@ -92,7 +91,7 @@
 							{/each}
 						</div>
 					</Card>
-				</a>
+				</button>
 			{/each}
 			{#if rI === routingResponses.length - 1}
 				<div class="w-full flex justify-between items-center space-x-4">

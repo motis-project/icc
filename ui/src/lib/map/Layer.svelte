@@ -44,8 +44,8 @@
 
 		if (!l) {
 			console.log('ADD LAYER', source.id, id, type, filter, layout, paint);
+			// @ts-ignore type not assignable
 			ctx.map!.addLayer({
-				// @ts-expect-error: Type 'string' is not assignable to type 'SourceSpecification'
 				source: source.id,
 				id,
 				type,
