@@ -134,7 +134,7 @@ jobs:
 
       # ==== RESTORE CACHE ====
       - name: Restore buildcache Cache
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         id: restore-buildcache
         with:
           path: ${{ github.workspace }}/.buildcache
@@ -145,7 +145,7 @@ jobs:
             buildcache-${{ matrix.config.preset }}-
 
       - name: Dependencies Cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/deps
           key: deps-${{ hashFiles('.pkg') }}
@@ -169,7 +169,7 @@ jobs:
       # ==== SAVE CACHE ====
       - name: Save buildcache cache
         if: always()
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v4
         with:
           path: ${{ github.workspace }}/.buildcache
           key: ${{ steps.restore-buildcache.outputs.cache-primary-key }}
