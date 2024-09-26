@@ -26,7 +26,7 @@
 	<AddressTypeahead name="from" class="w-full" placeholder="From" bind:value={from} />
 	<AddressTypeahead name="to" class="w-full" placeholder="To" bind:value={to} />
 	<div class="flex flex-row space-x-2 justify-between">
-		<DateInput class="bg-white" bind:value={dateTime} />
+		<DateInput bind:value={dateTime} />
 		<RadioGroup.Root class="flex space-x-1" bind:value={timeType}>
 			<Label
 				for="departure"
@@ -45,7 +45,7 @@
 		</RadioGroup.Root>
 		<div class="min-w-24">
 			<Select.Root bind:selected={profile}>
-				<Select.SelectTrigger class="bg-white">
+				<Select.SelectTrigger>
 					<Select.SelectValue placeholder="Profile" />
 				</Select.SelectTrigger>
 				<Select.SelectContent>

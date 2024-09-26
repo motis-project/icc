@@ -66,14 +66,16 @@
 	style={getStyle(level)}
 >
 	<Control position="top-left">
-		<Card class="w-[500px] overflow-y-auto overflow-x-hidden bg-white rounded-lg">
+		<Card class="w-[500px] overflow-y-auto overflow-x-hidden bg-background rounded-lg">
 			<SearchMask bind:from bind:to bind:dateTime bind:timeType bind:profile />
 		</Card>
 	</Control>
 
 	{#if !selectedItinerary && baseQuery && routingResponses.length !== 0}
 		<Control position="top-left">
-			<Card class="w-[500px] max-h-[70vh] overflow-y-auto overflow-x-hidden bg-white rounded-lg">
+			<Card
+				class="w-[500px] max-h-[70vh] overflow-y-auto overflow-x-hidden bg-background rounded-lg"
+			>
 				<ItineraryList {routingResponses} {baseQuery} bind:selectedItinerary />
 			</Card>
 		</Control>
@@ -81,7 +83,7 @@
 
 	{#if selectedItinerary}
 		<Control position="top-left">
-			<Card class="w-[500px] bg-white rounded-lg">
+			<Card class="w-[500px] bg-background rounded-lg">
 				<div class="w-full flex justify-between items-center shadow-md pl-1 mb-1">
 					<h2 class="ml-2 text-base font-semibold tracking-tight">Journey Details</h2>
 					<Button
