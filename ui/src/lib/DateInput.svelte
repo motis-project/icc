@@ -6,7 +6,7 @@
 		class: className
 	}: {
 		value: Date;
-		class: string | undefined;
+		class?: string;
 	} = $props();
 
 	let el: undefined | HTMLInputElement;
