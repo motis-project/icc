@@ -3,7 +3,7 @@
 	import { getContext, onDestroy, type Snippet } from 'svelte';
 
 	class Props {
-		children!: Snippet;
+		children?: Snippet;
 		position?: ControlPosition = 'top-right';
 	}
 
@@ -37,5 +37,7 @@
 </script>
 
 <div class:hidden={!initialized} class="maplibregl-ctrl" {...props} bind:this={el}>
-	{@render children()}
+	{#if children}
+		{@render children()}
+	{/if}
 </div>

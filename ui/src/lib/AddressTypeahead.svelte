@@ -78,9 +78,11 @@
 
 	const onSelectedChange = (selected: Selected<Match> | undefined) => {
 		if (selected) {
-			value.match = selected.value;
-			value.precision = GEOCODER_PRECISION;
-			value.level = 0;
+			value = {
+				match: selected.value,
+				precision: GEOCODER_PRECISION,
+				level: 0
+			};
 		}
 	};
 </script>

@@ -6,12 +6,7 @@
 	import { getModeStyle } from '$lib/modeStyle';
 	import { formatDurationSec } from '$lib/formatDuration';
 
-	const {
-		itinerary
-	}: {
-		itinerary: Itinerary;
-	} = $props();
-
+	const { itinerary }: { itinerary: Itinerary } = $props();
 	const lastLeg = itinerary.legs.findLast((l) => l.duration !== 0);
 </script>
 

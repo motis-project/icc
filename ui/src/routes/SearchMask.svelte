@@ -5,6 +5,7 @@
 	import * as Select from '$lib/components/ui/select';
 	import DateInput from '$lib/DateInput.svelte';
 	import { type Location } from '$lib/Location';
+	import type { Selected } from 'bits-ui';
 
 	let {
 		from = $bindable(),
@@ -17,33 +18,31 @@
 		to: Location | undefined;
 		dateTime: Date;
 		timeType: string;
-		profile: string;
+		profile: Selected<string>;
 	} = $props();
 </script>
 
 <div class="flex flex-col space-y-4 p-4 shadow-md rounded">
 	<AddressTypeahead name="from" class="w-full" placeholder="From" bind:value={from} />
 	<AddressTypeahead name="to" class="w-full" placeholder="To" bind:value={to} />
-	<div class="flex flex-row space-x-4 justify-between">
-		<div class="flex">
-			<DateInput class="bg-white" bind:value={dateTime} />
-			<RadioGroup.Root class="flex space-x-1 ml-1" bind:value={timeType}>
-				<Label
-					for="departure"
-					class="flex items-center rounded-md border-2 border-muted bg-popover p-1 px-2 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-blue-600 hover:cursor-pointer"
-				>
-					<RadioGroup.Item value="departure" id="departure" class="sr-only" aria-label="Abfahrt" />
-					<span>Abfahrt</span>
-				</Label>
-				<Label
-					for="arrival"
-					class="flex items-center rounded-md border-2 border-muted bg-popover p-1 px-2 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-blue-600 hover:cursor-pointer"
-				>
-					<RadioGroup.Item value="arrival" id="arrival" class="sr-only" aria-label="Ankunft" />
-					<span>Ankunft</span>
-				</Label>
-			</RadioGroup.Root>
-		</div>
+	<div class="flex flex-row space-x-2 justify-between">
+		<DateInput class="bg-white" bind:value={dateTime} />
+		<RadioGroup.Root class="flex space-x-1" bind:value={timeType}>
+			<Label
+				for="departure"
+				class="flex items-center rounded-md border-2 border-muted bg-popover p-1 px-2 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-blue-600 hover:cursor-pointer"
+			>
+				<RadioGroup.Item value="departure" id="departure" class="sr-only" aria-label="Abfahrt" />
+				<span>Abfahrt</span>
+			</Label>
+			<Label
+				for="arrival"
+				class="flex items-center rounded-md border-2 border-muted bg-popover p-1 px-2 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-blue-600 hover:cursor-pointer"
+			>
+				<RadioGroup.Item value="arrival" id="arrival" class="sr-only" aria-label="Ankunft" />
+				<span>Ankunft</span>
+			</Label>
+		</RadioGroup.Root>
 		<div class="min-w-24">
 			<Select.Root bind:selected={profile}>
 				<Select.SelectTrigger class="bg-white">
