@@ -34,3 +34,7 @@
   url=git@github.com:motis-project/unordered_dense.git
   branch=master
   commit=e9e0577fcb082fc660fd548946f92c42fc85a9fa
+[reflect-cpp]
+  url=git@github.com:getml/reflect-cpp.git
+  branch=main
+  commit=ef39b21935402d90b89167607055255d95d99d51
