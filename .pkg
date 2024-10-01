@@ -34,6 +34,10 @@
   url=git@github.com:motis-project/unordered_dense.git
   branch=master
   commit=e9e0577fcb082fc660fd548946f92c42fc85a9fa
+[yaml-cpp]
+  url=git@github.com:triptix-tech/yaml-cpp.git
+  branch=main
+  commit=1d8ca1f35eb3a9c9142462b28282a848e5d29a91
 [reflect-cpp]
   url=git@github.com:getml/reflect-cpp.git
   branch=main
