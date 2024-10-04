@@ -8,6 +8,8 @@ using namespace nigiri;
 
 TEST(motis, config) {
   auto const c = config{
+      .features_ = {{feature::TIMETABLE, feature::GEOCODING,
+                     feature::REVERSE_GEOCODING, feature::STREET_ROUTING}},
       .first_day_ = "2024-10-02",
       .num_days_ = 2U,
       .timetables_ =
@@ -28,6 +30,11 @@ TEST(motis, config) {
       .assistance_times_ = {"assistance.csv"}};
 
   EXPECT_EQ(R"(
+features:
+  - TIMETABLE
+  - GEOCODING
+  - REVERSE_GEOCODING
+  - STREET_ROUTING
 first_day: 2024-10-02
 num_days: 2
 merge_dupes_intra_src: false
@@ -58,6 +65,11 @@ assistance_times: assistance.csv
                 .str());
 
   EXPECT_EQ(c, config::read(R"(
+features:
+  - TIMETABLE
+  - GEOCODING
+  - REVERSE_GEOCODING
+  - STREET_ROUTING
 first_day: 2024-10-02
 num_days: 2
 max_footpath_length: 15

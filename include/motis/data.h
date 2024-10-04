@@ -40,6 +40,8 @@ struct data {
 
   static void load(std::filesystem::path const&, data&);
 
+  void load_osr(std::filesystem::path const&);
+
   bool has_tt() const { return tt_.get() != nullptr; }
   bool has_osr() const { return w_ != nullptr; }
   bool has_platforms() const { return pl_ != nullptr; }

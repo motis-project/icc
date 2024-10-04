@@ -31,6 +31,17 @@ namespace motis {
 data::data() {}
 data::~data() = default;
 
+void data::load_osr(fs::path const& p) {
+  auto const osr_path = p / "osr";
+  w_ = std::make_unique<osr::ways>(osr_path, cista::mmap::protection::READ);
+  l_ = std::make_unique<osr::lookup>(*w_);
+  elevator_nodes_ =
+      std::make_unique<hash_set<osr::node_idx_t>>(get_elevator_nodes(*w_));
+  pl_ =
+      std::make_unique<osr::platforms>(osr_path, cista::mmap::protection::READ);
+  pl_->build_rtree(*w_);
+}
+
 void data::load(std::filesystem::path const& p, data& d) {
   d.rt_ = std::make_shared<rt>();
 
@@ -71,17 +82,7 @@ void data::load(std::filesystem::path const& p, data& d) {
 
   auto const osr_path = p / "osr";
   if (fs::is_directory(osr_path)) {
-    d.w_ =
-        std::make_unique<osr::ways>(p / "osr", cista::mmap::protection::READ);
-    d.l_ = std::make_unique<osr::lookup>(*d.w_);
-    d.elevator_nodes_ =
-        std::make_unique<hash_set<osr::node_idx_t>>(get_elevator_nodes(*d.w_));
-
-    if (fs::is_regular_file(osr_path / "node_pos.bin")) {
-      d.pl_ = std::make_unique<osr::platforms>(p / "osr",
-                                               cista::mmap::protection::READ);
-      d.pl_->build_rtree(*d.w_);
-    }
+    d.load_osr(p);
   } else {
     fmt::println("{} not found -> not loading street routing", osr_path);
   }
