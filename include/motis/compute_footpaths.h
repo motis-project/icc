@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nigiri/timetable.h"
+#include "cista/memory_holder.h"
 
 #include "osr/types.h"
 

@@ -5,12 +5,9 @@
 #include <map>
 #include <optional>
 #include <set>
-
-#include "boost/url/url.hpp"
+#include <thread>
 
 #include "utl/verify.h"
-
-#include "nigiri/clasz.h"
 
 #include "cista/reflection/comparable.h"
 
@@ -55,6 +52,9 @@ struct config {
   bool has_feature(feature) const;
   void verify();
 
+  std::string host_{"0.0.0.0"};
+  std::string port_{"8080"};
+  unsigned n_threads_{std::thread::hardware_concurrency()};
   std::optional<std::set<feature>> features_{};
   std::string first_day_{"TODAY"};
   std::uint16_t num_days_{365U};

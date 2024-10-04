@@ -4,22 +4,19 @@
 
 #include "fmt/ranges.h"
 
+#include "utl/to_vec.h"
+
 #include "nigiri/loader/assistance.h"
-#include "nigiri/loader/dir.h"
-#include "nigiri/loader/gtfs/load_timetable.h"
-#include "nigiri/loader/init_finish.h"
 #include "nigiri/loader/load.h"
+#include "nigiri/loader/loader_interface.h"
 #include "nigiri/clasz.h"
 #include "nigiri/common/parse_date.h"
-#include "nigiri/rt/create_rt_timetable.h"
-#include "nigiri/rt/rt_timetable.h"
 #include "nigiri/shape.h"
 #include "nigiri/timetable.h"
 
 #include "osr/extract/extract.h"
 #include "osr/lookup.h"
 #include "osr/platforms.h"
-#include "osr/routing/route.h"
 #include "osr/ways.h"
 
 #include "adr/adr.h"
@@ -28,14 +25,7 @@
 #include "motis/adr_extend_tt.h"
 #include "motis/compute_footpaths.h"
 #include "motis/data.h"
-#include "motis/elevators/elevators.h"
-#include "motis/elevators/match_elevator.h"
-#include "motis/elevators/parse_fasta.h"
-#include "motis/endpoints/routing.h"
-#include "motis/get_loc.h"
-#include "motis/match_platforms.h"
 #include "motis/tt_location_rtree.h"
-#include "motis/update_rtt_td_footpaths.h"
 
 namespace fs = std::filesystem;
 namespace n = nigiri;
@@ -61,6 +51,7 @@ struct fmt::formatter<motis::task> : fmt::ostream_formatter {};
 namespace motis {
 
 void import(config const& c, fs::path const& data_path) {
+  auto bars = utl::global_progress_bars{false};
   auto d = data{data_path};
 
   auto osr =

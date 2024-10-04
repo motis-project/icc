@@ -1,17 +1,17 @@
 #include "fmt/core.h"
 
 #include "boost/asio/io_context.hpp"
-#include "boost/fiber/all.hpp"
-#include "boost/program_options.hpp"
 
 #include "net/web_server/query_router.h"
 #include "net/web_server/web_server.h"
 
+#include "utl/cmd_line_parser.h"
 #include "utl/init_from.h"
 
 #include "net/run.h"
 #include "net/stop_handler.h"
 
+#include "motis/config.h"
 #include "motis/data.h"
 #include "motis/elevators/elevators.h"
 #include "motis/endpoints/adr/geocode.h"
@@ -27,17 +27,9 @@
 #include "motis/endpoints/update_elevator.h"
 
 namespace asio = boost::asio;
-namespace bpo = boost::program_options;
-
+namespace fs = std::filesystem;
+using namespace std::string_view_literals;
 using namespace motis;
-
-struct boost_fiber_executor {
-  auto operator()(auto&& fn, net::web_server::http_res_cb_t const& cb) {
-    boost::fibers::fiber([f = std::forward<decltype(fn)>(fn)]() {
-      f();
-    }).detach();
-  }
-};
 
 template <typename T, typename From>
 void GET(auto&& r, std::string target, From& from) {
@@ -53,10 +45,8 @@ void POST(auto&& r, std::string target, From& from) {
   }
 }
 
-int main(int ac, char** av) {
-  auto d = data{};
-  data::load(ac == 2U ? av[1] : "data", d);
-
+int server(fs::path data_path, config const& c) {
+  auto d = data{std::move(data_path), c};
   auto ioc = asio::io_context{};
   auto workers = asio::io_context{};
   auto s = net::web_server{ioc};
@@ -79,7 +69,7 @@ int main(int ac, char** av) {
   s.on_http_request(std::move(qr));
 
   auto ec = boost::system::error_code{};
-  s.init("0.0.0.0", "7999", ec);
+  s.init(c.host_, c.port_, ec);
   s.run();
   if (ec) {
     std::cerr << "error: " << ec << "\n";
@@ -95,11 +85,41 @@ int main(int ac, char** av) {
 
   auto const stop = net::stop_handler(ioc, [&]() { s.stop(); });
 
-  std::cout << "listening on 0.0.0.0:7999\n";
+  fmt::println("listening on {}:{}", c.host_, c.port_);
   net::run(ioc)();
 
   workers.stop();
   for (auto& t : threads) {
     t.join();
+  }
+
+  return 0;
+}
+
+int main(int ac, char const** av) {
+  constexpr auto const kDefaultMode = "server";
+  auto const subcommand =
+      ac <= 1U ? std::string_view{kDefaultMode} : std::string_view{av[1]};
+
+  if (subcommand == "server") {
+    struct flags {
+      utl::cmd_line_flag<fs::path,
+                         UTL_SHORT("-d"),
+                         UTL_LONG("--data_path"),
+                         UTL_DESC("data path")>
+          data_path_{"data"};
+      utl::cmd_line_flag<fs::path,
+                         UTL_SHORT("-c"),
+                         UTL_LONG("--config"),
+                         UTL_DESC("target file")>
+          config_path_{"config.ini"};
+      utl::cmd_line_flag<std::size_t,
+                         UTL_LONG("--num_threads"),
+                         UTL_DESC("thread pool size")>
+          n_threads_{std::thread::hardware_concurrency()};
+    };
+    auto const f = utl::parse_flags<flags>(ac - 1, av + 1);
+    return server(std::move(*f.data_path_), config::read(*f.config_path_));
+  } else {
   }
 }
