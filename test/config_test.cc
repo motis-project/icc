@@ -28,10 +28,10 @@ TEST(motis, config) {
       .osm_ = {"europe-latest.osm.pbf"},
       .assistance_times_ = {"assistance.csv"}};
 
-  EXPECT_EQ(R"(
+  EXPECT_EQ(fmt::format(R"(
 host: 0.0.0.0
 port: 8080
-n_threads: 32
+n_threads: {}
 features:
   - GEOCODING
   - REVERSE_GEOCODING
@@ -65,7 +65,8 @@ timetables:
       - url: https://gtfs.ovapi.nl/nl/tripUpdates.pb
 osm: europe-latest.osm.pbf
 assistance_times: assistance.csv
-)"s,
+)",
+                        std::thread::hardware_concurrency()),
             (std::stringstream{} << "\n"
                                  << c << "\n")
                 .str());
