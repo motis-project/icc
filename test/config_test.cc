@@ -4,7 +4,6 @@
 
 using namespace motis;
 using namespace std::string_literals;
-using namespace nigiri;
 
 TEST(motis, config) {
   auto const c = config{
@@ -30,15 +29,22 @@ TEST(motis, config) {
       .assistance_times_ = {"assistance.csv"}};
 
   EXPECT_EQ(R"(
+host: 0.0.0.0
+port: 8080
+n_threads: 32
 features:
-  - TIMETABLE
   - GEOCODING
   - REVERSE_GEOCODING
+  - TIMETABLE
   - STREET_ROUTING
 first_day: 2024-10-02
 num_days: 2
+with_shapes: true
+ignore_errors: false
+adjust_footpaths: true
 merge_dupes_intra_src: false
 merge_dupes_inter_src: false
+link_stop_distance: 100
 max_footpath_length: 15
 timetables:
   de:

@@ -96,8 +96,8 @@ void import(config const& c, fs::path const& data_path) {
         fs::create_directories(data_path / "n" / "shapes", ec);
 
         auto const first_day = n::parse_date(c.first_day_);
-        auto const interval =
-            n::interval{first_day, first_day + std::chrono::days{c.num_days_}};
+        auto const interval = n::interval<date::sys_days>{
+            first_day, first_day + std::chrono::days{c.num_days_}};
 
         auto assistance = std::unique_ptr<nl::assistance_times>{};
         if (c.assistance_times_.has_value()) {

@@ -2,6 +2,8 @@
 
 #include <map>
 
+#include "boost/json.hpp"
+
 #include "utl/init_from.h"
 
 #include "nigiri/loader/gtfs/load_timetable.h"
@@ -287,7 +289,10 @@ TEST(motis, routing) {
         date::sys_days{2019_y / November / 1}},
        kGTFS);
 
-  auto d = data{data_path, config{}};
+  auto d = data{
+      data_path,
+      config{.features_ = {{feature::OSR_FOOTPATHS, feature::ELEVATORS,
+                            feature::TIMETABLE, feature::STREET_ROUTING}}}};
   auto const routing = utl::init_from<ep::routing>(d).value();
 
   // Route with wheelchair.
