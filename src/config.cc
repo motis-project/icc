@@ -45,17 +45,6 @@ private:
   }
 };
 
-template <rfl::internal::StringLiteral Name, size_t I = 0, char... Chars>
-consteval auto drop_first() {
-  if constexpr (I == 0U) {
-    return drop_first<Name, I + 1, Chars...>();
-  } else if (I == Name.arr_.size() - 1) {
-    return rfl::internal::StringLiteral<sizeof...(Chars) + 1>(Chars...);
-  } else {
-    return drop_first<Name, I + 1, Chars..., Name.arr_[I]>();
-  }
-}
-
 std::ostream& operator<<(std::ostream& out, config const& c) {
   return out << rfl::yaml::write<drop_trailing>(c);
 }
@@ -69,6 +58,37 @@ config config::read(std::filesystem::path const& p) {
 config config::read(std::string const& s) {
   return rfl::yaml::read<config, drop_trailing, rfl::DefaultIfMissing>(s)
       .value();
+}
+
+bool config::has_feature(feature const f) const {
+  return !features_.has_value() || features_->contains(f);
+}
+
+void config::verify() {
+  utl::verify(!has_feature(feature::GEOCODING) || osm_.has_value(),
+              "feature GEOCODING requires OpenStreetMap data");
+  utl::verify(!has_feature(feature::REVERSE_GEOCODING) ||
+                  (has_feature(feature::GEOCODING) && osm_.has_value()),
+              "feature REVERSE_GEOCODING requires OpenStreetMap data and "
+              "feature GEOCODING");
+  utl::verify(!has_feature(feature::TILES) || osm_.has_value(),
+              "feature TILES requires OpenStreetMap data");
+  utl::verify(!has_feature(feature::STREET_ROUTING) || osm_.has_value(),
+              "feature STREET_ROUTING requires OpenStreetMap data");
+  utl::verify(!has_feature(feature::TIMETABLE) ||
+                  (timetables_.has_value() && !timetables_->empty()),
+              "feature TIMETABLE requires timetable data");
+  utl::verify(
+      !has_feature(feature::OSR_FOOTPATHS) ||
+          (has_feature(feature::STREET_ROUTING) &&
+           has_feature(feature::TIMETABLE)),
+      "feature OSR_FOOTPATHS requires features STREET_ROUTING and TIMETABLE");
+  utl::verify(
+      !has_feature(feature::ELEVATORS) ||
+          (fasta_.has_value() && has_feature(feature::STREET_ROUTING) &&
+           has_feature(feature::TIMETABLE)),
+      "feature ELEVATORS requires fasta.json and features STREET_ROUTING and "
+      "TIMETABLE");
 }
 
 }  // namespace motis

@@ -17,6 +17,7 @@
 #include "osr/ways.h"
 
 #include "motis/compute_footpaths.h"
+#include "motis/config.h"
 #include "motis/data.h"
 #include "motis/elevators/elevators.h"
 #include "motis/elevators/match_elevator.h"
@@ -286,8 +287,7 @@ TEST(motis, routing) {
         date::sys_days{2019_y / November / 1}},
        kGTFS);
 
-  auto d = data{};
-  data::load(data_path, d);
+  auto d = data{data_path, config{}};
   auto const routing = utl::init_from<ep::routing>(d).value();
 
   // Route with wheelchair.

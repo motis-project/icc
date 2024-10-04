@@ -23,6 +23,8 @@ enum class feature {
   REVERSE_GEOCODING,
   TIMETABLE,
   STREET_ROUTING,
+  OSR_FOOTPATHS,
+  ELEVATORS,
   TILES
 };
 
@@ -50,36 +52,24 @@ struct config {
   static config read(std::filesystem::path const&);
   static config read(std::string const&);
 
-  bool has_feature(feature const f) const {
-    return !features_.has_value() || features_->contains(f);
-  }
+  bool has_feature(feature) const;
+  void verify();
 
-  bool verify() {
-    utl::verify(!has_feature(feature::REVERSE_GEOCODING) || osm_.has_value(),
-                "feature REVERSE_GEOCODING requires OpenStreetMap data");
-    utl::verify(!has_feature(feature::GEOCODING) || osm_.has_value(),
-                "feature GEOCODING requires OpenStreetMap data");
-    utl::verify(!has_feature(feature::TILES) || osm_.has_value(),
-                "feature TILES requires OpenStreetMap data");
-    utl::verify(!has_feature(feature::STREET_ROUTING) || osm_.has_value(),
-                "feature STREET_ROUTING requires OpenStreetMap data");
-    utl::verify(!has_feature(feature::TIMETABLE) ||
-                    (timetables_.has_value() && !timetables_->empty()),
-                "feature TIMETABLE requires timetable data");
-  }
-
-  std::optional<std::set<feature>> features_;
+  std::optional<std::set<feature>> features_{};
   std::string first_day_{"TODAY"};
   std::uint16_t num_days_{365U};
+  bool with_shapes_{true};
+  bool ignore_errors_{false};
+  bool adjust_footpaths_{true};
   bool merge_dupes_intra_src_{false};
   bool merge_dupes_inter_src_{false};
-  unsigned max_footpath_length_{15};
+  unsigned link_stop_distance_{100U};
+  std::uint16_t max_footpath_length_{15};
   std::optional<std::string> default_timezone_{};
-  std::optional<std::map<std::string, timetable>> timetables_;
-  std::optional<std::filesystem::path> osm_;
-  std::optional<std::filesystem::path> assistance_times_;
-  std::optional<std::vector<std::string>> enabled_features_{};
-  std::optional<std::vector<std::string>> disabled_features_{};
+  std::optional<std::map<std::string, timetable>> timetables_{};
+  std::optional<std::filesystem::path> osm_{};
+  std::optional<std::filesystem::path> assistance_times_{};
+  std::optional<std::filesystem::path> fasta_{};
 };
 
 }  // namespace motis

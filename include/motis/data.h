@@ -15,6 +15,7 @@
 
 namespace motis {
 
+struct config;
 struct elevators;
 
 template <typename T>
@@ -29,7 +30,8 @@ struct rt {
 };
 
 struct data {
-  data();
+  data(std::filesystem::path);
+  data(std::filesystem::path, config const&);
   ~data();
 
   data(data const&) = delete;
@@ -38,22 +40,21 @@ struct data {
   data& operator=(data const&) = delete;
   data& operator=(data&&) = delete;
 
-  static void load(std::filesystem::path const&, data&);
-
-  void load_osr(std::filesystem::path const&);
-
-  bool has_tt() const { return tt_.get() != nullptr; }
-  bool has_osr() const { return w_ != nullptr; }
-  bool has_platforms() const { return pl_ != nullptr; }
-
-  nigiri::timetable const* tt() const { return tt_.get(); }
+  void load_osr();
+  void load_tt();
+  void load_geocoder();
+  void load_reverse_geocoder();
+  void load_elevators();
 
   auto cista_members() {
+    // !!! Remember to add all new members !!!
     return std::tie(t_, r_, tc_, w_, pl_, l_, tt_, location_rtee_,
                     elevator_nodes_, matches_, rt_);
   }
 
+  std::filesystem::path path_;
   cista::wrapped<adr::typeahead> t_;
+  ptr<adr::area_database> area_db_;
   ptr<adr::reverse> r_;
   ptr<adr::cache> tc_;
   ptr<osr::ways> w_;
