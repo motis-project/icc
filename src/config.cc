@@ -56,32 +56,8 @@ consteval auto drop_first() {
   }
 }
 
-struct rename_enum {
-public:
-  template <typename StructType>
-  static auto process(auto&& named_tuple) {
-    const auto handle_one = []<typename FieldType>(FieldType&& f) {
-      if constexpr (FieldType::name() != "xml_content" &&
-                    std::is_enum_v<typename FieldType::Type>) {
-        return handle_one_field(std::move(f));
-      } else {
-        return std::move(f);
-      }
-    };
-    return named_tuple.transform(handle_one);
-  }
-
-private:
-  template <typename FieldType>
-  static auto handle_one_field(FieldType&& _f) {
-    using NewFieldType =
-        rfl::Field<drop_first<FieldType::name_>(), typename FieldType::Type>;
-    return NewFieldType(_f.value());
-  }
-};
-
 std::ostream& operator<<(std::ostream& out, config const& c) {
-  return out << rfl::yaml::write<drop_trailing, rename_enum>(c);
+  return out << rfl::yaml::write<drop_trailing>(c);
 }
 
 config config::read(std::filesystem::path const& p) {
@@ -91,8 +67,7 @@ config config::read(std::filesystem::path const& p) {
 }
 
 config config::read(std::string const& s) {
-  return rfl::yaml::read<config, drop_trailing, rename_enum,
-                         rfl::DefaultIfMissing>(s)
+  return rfl::yaml::read<config, drop_trailing, rfl::DefaultIfMissing>(s)
       .value();
 }
 
