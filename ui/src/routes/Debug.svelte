@@ -271,7 +271,7 @@
 		{/await}
 	{/if}
 
-	{#snippet nodeDetails(e, close, features)}
+	{#snippet nodeDetails(_1: maplibregl.MapMouseEvent, _2: () => void, features: any)}
 		<Table>
 			<TableBody>
 				{#each Object.entries(features[0].properties) as [key, value]}

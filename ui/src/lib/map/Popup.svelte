@@ -7,7 +7,7 @@
 		class: className,
 		trigger
 	}: {
-		children?: Snippet<[unknown, () => void, unknown?]>;
+		children?: Snippet<[maplibregl.MapMouseEvent, () => void, unknown?]>;
 		class?: string;
 		trigger: 'click' | 'contextmenu';
 	} = $props();
@@ -17,7 +17,7 @@
 
 	let popupEl = $state<HTMLDivElement>();
 	let popup = $state<maplibregl.Popup>();
-	let event = $state.raw();
+	let event = $state.raw<maplibregl.MapMouseEvent>();
 	let features = $state.raw();
 
 	const close = () => {
@@ -27,7 +27,7 @@
 		}
 	};
 
-	const onTrigger = (e) => {
+	const onTrigger = (e: maplibregl.MapMouseEvent) => {
 		if (ctx.map) {
 			if (popup) {
 				popup.remove();
@@ -39,6 +39,7 @@
 			popup.setLngLat(e.lngLat);
 			popup.addTo(ctx.map!);
 			event = e;
+			// @ts-expect-error features is secret -.-
 			features = e.features;
 		}
 	};
