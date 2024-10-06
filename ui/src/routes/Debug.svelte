@@ -271,6 +271,7 @@
 		{/await}
 	{/if}
 
+	<!-- eslint-disable-next-line -->
 	{#snippet nodeDetails(_1: maplibregl.MapMouseEvent, _2: () => void, features: any)}
 		<Table>
 			<TableBody>
