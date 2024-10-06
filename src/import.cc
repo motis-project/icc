@@ -10,7 +10,17 @@
 #include "fmt/ranges.h"
 
 #include "utl/erase_if.h"
+#include "utl/read_file.h"
 #include "utl/to_vec.h"
+
+#include "tiles/db/clear_database.h"
+#include "tiles/db/feature_inserter_mt.h"
+#include "tiles/db/feature_pack.h"
+#include "tiles/db/pack_file.h"
+#include "tiles/db/prepare_tiles.h"
+#include "tiles/db/tile_database.h"
+#include "tiles/osm/load_coastlines.h"
+#include "tiles/osm/load_osm.h"
 
 #include "nigiri/loader/assistance.h"
 #include "nigiri/loader/load.h"
@@ -126,6 +136,15 @@ void import(config const& c, fs::path const& data_path) {
   auto osm_hash = std::pair{"osm"s, cista::BASE_HASH};
   if (c.osm_.has_value()) {
     osm_hash.second = hash_file(*c.osm_);
+  }
+
+  auto coastline_hash = std::pair{"coastline"s, cista::BASE_HASH};
+  auto tiles_profile_hash = std::pair{"tiles_profile", cista::BASE_HASH};
+  if (c.tiles_.has_value()) {
+    if (c.tiles_->coastline_.has_value()) {
+      coastline_hash.second = hash_file(*c.tiles_->coastline_);
+    }
+    tiles_profile_hash.second = hash_file(c.tiles_->profile_);
   }
 
   auto const osr_version = meta_entry_t{"osr_bin_ver", osr::kBinaryVersion};
@@ -262,7 +281,54 @@ void import(config const& c, fs::path const& data_path) {
       [&]() {},
       {tt_hash, osm_hash, osr_version, n_version}};
 
-  auto tasks = std::vector<task>{osr, adr, tt, adr_extend, osr_footpath};
+  auto tiles = task{
+      "tiles",
+      [&]() { return c.has_feature(feature::TILES); },
+      [&]() { return true; },
+      [&]() {
+        auto const progress_tracker = utl::get_active_progress_tracker();
+
+        auto const dir = data_path / "tiles";
+        auto const path = (dir / "tiles.mdb").string();
+
+        auto ec = std::error_code{};
+        fs::create_directories(data_path / "tiles");
+
+        progress_tracker->status("Clear Database");
+        ::tiles::clear_database(path, c.tiles_->db_size_);
+        ::tiles::clear_pack_file(path.c_str());
+
+        auto db_env =
+            ::tiles::make_tile_database(path.c_str(), c.tiles_->db_size_);
+        ::tiles::tile_db_handle db_handle{db_env};
+        ::tiles::pack_handle pack_handle{path.c_str()};
+
+        {
+          ::tiles::feature_inserter_mt inserter{
+              ::tiles::dbi_handle{db_handle, db_handle.features_dbi_opener()},
+              pack_handle};
+
+          if (c.tiles_->coastline_.has_value()) {
+            progress_tracker->status("Load Coastlines").out_bounds(0, 20);
+            ::tiles::load_coastlines(db_handle, inserter,
+                                     *c.tiles_->coastline_);
+          }
+
+          progress_tracker->status("Load Features").out_bounds(20, 70);
+          ::tiles::load_osm(db_handle, inserter, *c.osm_, c.tiles_->profile_,
+                            dir.generic_string());
+        }
+
+        progress_tracker->status("Pack Features").out_bounds(70, 90);
+        ::tiles::pack_features(db_handle, pack_handle);
+
+        progress_tracker->status("Prepare Tiles").out_bounds(90, 100);
+        ::tiles::prepare_tiles(db_handle, pack_handle, 10);
+      },
+      []() {},
+      {osm_hash, coastline_hash, tiles_profile_hash}};
+
+  auto tasks = std::vector<task>{osr, adr, tt, adr_extend, osr_footpath, tiles};
   utl::erase_if(tasks, [&](auto&& t) { return !t.should_run_(); });
 
   while (!tasks.empty()) {

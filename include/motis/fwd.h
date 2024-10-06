@@ -21,3 +21,7 @@ struct td_offset;
 struct offset;
 }  // namespace routing
 }  // namespace nigiri
+
+namespace motis {
+struct tiles_data;
+}

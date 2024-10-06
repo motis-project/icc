@@ -47,6 +47,17 @@ struct config {
   std::optional<std::filesystem::path> osm_{};
   std::optional<std::filesystem::path> fasta_{};
 
+  struct tiles {
+    bool operator==(tiles const&) const = default;
+    std::filesystem::path profile_;
+    std::optional<std::filesystem::path> coastline_;
+    std::size_t db_size_{sizeof(void*) >= 8
+                             ? 1024ULL * 1024ULL * 1024ULL * 1024ULL
+                             : 256U * 1024U * 1024U};
+    std::size_t flush_threshold_{sizeof(void*) >= 8 ? 10'000'000 : 100'000};
+  };
+  std::optional<tiles> tiles_;
+
   struct timetable {
     struct dataset {
       struct rt {

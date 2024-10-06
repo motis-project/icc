@@ -24,6 +24,7 @@
 #include "motis/endpoints/osr_routing.h"
 #include "motis/endpoints/platforms.h"
 #include "motis/endpoints/routing.h"
+#include "motis/endpoints/tiles.h"
 #include "motis/endpoints/update_elevator.h"
 #include "motis/import.h"
 
@@ -82,6 +83,11 @@ int server(int ac, char** av) {
   GET<ep::reverse_geocode>(qr, "/api/v1/reverse-geocode", d);
   GET<ep::geocode>(qr, "/api/v1/geocode", d);
   GET<ep::routing>(qr, "/api/v1/plan", d);
+
+  if (c.has_feature(motis::feature::TILES)) {
+    utl::verify(d.tiles_ != nullptr, "tiles data not loaded");
+    qr.route("GET", "/tiles/.*", ep::tiles{*d.tiles_});
+  }
 
   qr.serve_files("ui/build");
   qr.enable_cors();

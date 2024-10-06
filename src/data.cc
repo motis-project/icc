@@ -22,6 +22,7 @@
 #include "motis/elevators/parse_fasta.h"
 #include "motis/match_platforms.h"
 #include "motis/point_rtree.h"
+#include "motis/tiles_data.h"
 #include "motis/tt_location_rtree.h"
 #include "motis/update_rtt_td_footpaths.h"
 
@@ -67,6 +68,10 @@ data::data(std::filesystem::path p, config const& c) : path_{std::move(p)} {
 
   if (c.has_feature(feature::ELEVATORS)) {
     load_elevators();
+  }
+
+  if (c.has_feature(feature::TILES)) {
+    load_tiles();
   }
 }
 
@@ -126,6 +131,12 @@ void data::load_elevators() {
   motis::update_rtt_td_footpaths(*w_, *l_, *pl_, *tt_, *location_rtee_,
                                  *rt_->e_, *elevator_footpath_map, *matches_,
                                  *rt_->rtt_);
+}
+
+void data::load_tiles() {
+  auto const db_size =
+      config::read(path_ / "config.yml").tiles_.value().db_size_;
+  tiles_ = std::make_unique<tiles_data>(path_ / "tiles" / "tiles.mdb", db_size);
 }
 
 }  // namespace motis

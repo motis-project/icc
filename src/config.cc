@@ -98,6 +98,18 @@ void config::verify() const {
               "OpenStreetMap file does not exist: {}",
               osm_.value_or(fs::path{}));
 
+  utl::verify(!has_feature(feature::TILES) || tiles_.has_value(),
+              "feature TILES requires tiles setting");
+
+  utl::verify(!tiles_.has_value() || fs::is_regular_file(tiles_->profile_),
+              "tiles profile {} does not exist",
+              tiles_.value_or(tiles{}).profile_);
+
+  utl::verify(!tiles_.has_value() || !tiles_->coastline_.has_value() ||
+                  fs::exists(*tiles_->coastline_),
+              "coastline file {} does not exist",
+              tiles_.value_or(tiles{}).coastline_.value_or(""));
+
   if (timetable_.has_value()) {
     for (auto const [_, d] : timetable_->datasets_) {
       utl::verify(fs::is_directory(d.path_) || fs::is_regular_file(d.path_),
