@@ -63,7 +63,7 @@ int server(int ac, char** av) {
       vm);
   bpo::notify(vm);
 
-  auto c = config::read(data_path / "config.ini");
+  auto c = config::read(data_path / "config.yml");
   auto d = data{std::move(data_path), c};
 
   auto ioc = asio::io_context{};
@@ -117,7 +117,7 @@ int server(int ac, char** av) {
 }
 
 int import(int ac, char** av) {
-  auto config_path = fs::path{"config.ini"};
+  auto config_path = fs::path{"config.yml"};
   auto data_path = fs::path{"data"};
 
   auto desc = bpo::options_description{"Options"};

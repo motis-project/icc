@@ -274,7 +274,7 @@ void import(config const& c, fs::path const& data_path) {
     tasks.erase(task_it);
   }
 
-  std::ofstream{(data_path / "config.ini").generic_string()} << c << "\n";
+  std::ofstream{(data_path / "config.yml").generic_string()} << c << "\n";
 }
 
 }  // namespace motis
