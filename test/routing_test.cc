@@ -291,7 +291,7 @@ TEST(motis, routing) {
 
   auto d = data{
       data_path,
-      config{.features_ = {{feature::OSR_FOOTPATHS, feature::ELEVATORS,
+      config{.features_ = {{feature::OSR_FOOTPATH, feature::ELEVATORS,
                             feature::TIMETABLE, feature::STREET_ROUTING}}}};
   auto const routing = utl::init_from<ep::routing>(d).value();
 

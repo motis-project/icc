@@ -30,6 +30,15 @@ namespace n = nigiri;
 
 namespace motis {
 
+std::ostream& operator<<(std::ostream& out, data const& d) {
+  return out << "\nt=" << d.t_.get() << "\narea_db=" << d.area_db_
+             << "\nr=" << d.r_ << "\ntc=" << d.tc_ << "\nw=" << d.w_
+             << "\npl=" << d.pl_ << "\nl=" << d.l_ << "\ntt=" << d.tt_.get()
+             << "\nlocation_rtee=" << d.location_rtee_
+             << "\nelevator_nodes=" << d.elevator_nodes_
+             << "\nmatches=" << d.matches_ << "\nrt=" << d.rt_ << "\n";
+}
+
 data::data(std::filesystem::path p) : path_{std::move(p)} {}
 
 data::data(std::filesystem::path p, config const& c) : path_{std::move(p)} {
@@ -51,10 +60,13 @@ data::data(std::filesystem::path p, config const& c) : path_{std::move(p)} {
     load_osr();
   }
 
+  if (c.has_feature(feature::STREET_ROUTING) &&
+      c.has_feature(feature::TIMETABLE)) {
+    load_matches();
+  }
+
   if (c.has_feature(feature::ELEVATORS)) {
     load_elevators();
-  } else {
-    fmt::println("not updating footpaths according to elevator status");
   }
 }
 
@@ -87,12 +99,18 @@ void data::load_tt() {
 void data::load_geocoder() {
   t_ = adr::read(path_ / "adr" / "t.bin", false);
   tc_ = std::make_unique<adr::cache>(t_->strings_.size(), 100U);
+  area_db_ = std::make_unique<adr::area_database>(
+      path_ / "adr", cista::mmap::protection::READ);
 }
 
 void data::load_reverse_geocoder() {
   r_ = std::make_unique<adr::reverse>(path_ / "adr",
                                       cista::mmap::protection::READ);
   r_->build_rtree(*t_);
+}
+
+void data::load_matches() {
+  matches_ = std::make_unique<platform_matches_t>(get_matches(*tt_, *pl_, *w_));
 }
 
 void data::load_elevators() {
@@ -103,7 +121,6 @@ void data::load_elevators() {
   rt_->e_ = std::make_unique<elevators>(*w_, *elevator_nodes_,
                                         parse_fasta(std::string_view{*fasta}));
 
-  matches_ = std::make_unique<platform_matches_t>(get_matches(*tt_, *pl_, *w_));
   auto const elevator_footpath_map =
       read_elevator_footpath_map(path_ / "elevator_footpath_map.bin");
   motis::update_rtt_td_footpaths(*w_, *l_, *pl_, *tt_, *location_rtee_,

@@ -7,8 +7,12 @@
 #include "utl/read_file.h"
 #include "utl/verify.h"
 
+#include "nigiri/clasz.h"
+
 #include "rfl.hpp"
 #include "rfl/yaml.hpp"
+
+namespace fs = std::filesystem;
 
 namespace motis {
 
@@ -64,7 +68,7 @@ bool config::has_feature(feature const f) const {
   return !features_.has_value() || features_->contains(f);
 }
 
-void config::verify() {
+void config::verify() const {
   utl::verify(!has_feature(feature::GEOCODING) || osm_.has_value(),
               "feature GEOCODING requires OpenStreetMap data");
   utl::verify(!has_feature(feature::REVERSE_GEOCODING) ||
@@ -76,19 +80,36 @@ void config::verify() {
   utl::verify(!has_feature(feature::STREET_ROUTING) || osm_.has_value(),
               "feature STREET_ROUTING requires OpenStreetMap data");
   utl::verify(!has_feature(feature::TIMETABLE) ||
-                  (timetables_.has_value() && !timetables_->empty()),
+                  (timetable_.has_value() && !timetable_->datasets_.empty()),
               "feature TIMETABLE requires timetable data");
   utl::verify(
-      !has_feature(feature::OSR_FOOTPATHS) ||
+      !has_feature(feature::OSR_FOOTPATH) ||
           (has_feature(feature::STREET_ROUTING) &&
            has_feature(feature::TIMETABLE)),
-      "feature OSR_FOOTPATHS requires features STREET_ROUTING and TIMETABLE");
+      "feature OSR_FOOTPATH requires features STREET_ROUTING and TIMETABLE");
   utl::verify(
       !has_feature(feature::ELEVATORS) ||
           (fasta_.has_value() && has_feature(feature::STREET_ROUTING) &&
            has_feature(feature::TIMETABLE)),
       "feature ELEVATORS requires fasta.json and features STREET_ROUTING and "
       "TIMETABLE");
+
+  utl::verify(!osm_.has_value() || fs::is_regular_file(*osm_),
+              "OpenStreetMap file does not exist: {}",
+              osm_.value_or(fs::path{}));
+
+  if (timetable_.has_value()) {
+    for (auto const [_, d] : timetable_->datasets_) {
+      utl::verify(fs::is_directory(d.path_) || fs::is_regular_file(d.path_),
+                  "timetable dataset does not exist: {}", d.path_);
+
+      if (d.clasz_bikes_allowed_.has_value()) {
+        for (auto const& c : *d.clasz_bikes_allowed_) {
+          nigiri::to_clasz(c.first);
+        }
+      }
+    }
+  }
 }
 
 }  // namespace motis

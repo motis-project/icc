@@ -1,11 +1,11 @@
 #include "fmt/core.h"
 
 #include "boost/asio/io_context.hpp"
+#include "boost/program_options.hpp"
 
 #include "net/web_server/query_router.h"
 #include "net/web_server/web_server.h"
 
-#include "utl/cmd_line_parser.h"
 #include "utl/init_from.h"
 
 #include "net/run.h"
@@ -25,8 +25,10 @@
 #include "motis/endpoints/platforms.h"
 #include "motis/endpoints/routing.h"
 #include "motis/endpoints/update_elevator.h"
+#include "motis/import.h"
 
 namespace asio = boost::asio;
+namespace bpo = boost::program_options;
 namespace fs = std::filesystem;
 using namespace std::string_view_literals;
 using namespace motis;
@@ -45,8 +47,25 @@ void POST(auto&& r, std::string target, From& from) {
   }
 }
 
-int server(fs::path data_path, config const& c) {
+int server(int ac, char** av) {
+  auto data_path = fs::path{"data"};
+
+  auto desc = bpo::options_description{"Options"};
+  desc.add_options()  //
+      ("help,h", "produce this help message")  //
+      ("data,d", bpo::value(&data_path)->default_value(data_path), "data path");
+
+  auto const pos_desc = bpo::positional_options_description{}.add("data", -1);
+
+  auto vm = bpo::variables_map{};
+  bpo::store(
+      bpo::command_line_parser(ac, av).options(desc).positional(pos_desc).run(),
+      vm);
+  bpo::notify(vm);
+
+  auto c = config::read(data_path / "config.ini");
   auto d = data{std::move(data_path), c};
+
   auto ioc = asio::io_context{};
   auto workers = asio::io_context{};
   auto s = net::web_server{ioc};
@@ -68,8 +87,9 @@ int server(fs::path data_path, config const& c) {
   qr.enable_cors();
   s.on_http_request(std::move(qr));
 
+  auto const server_config = c.server_.value_or(config::server{});
   auto ec = boost::system::error_code{};
-  s.init(c.host_, c.port_, ec);
+  s.init(server_config.host_, server_config.port_, ec);
   s.run();
   if (ec) {
     std::cerr << "error: " << ec << "\n";
@@ -85,7 +105,7 @@ int server(fs::path data_path, config const& c) {
 
   auto const stop = net::stop_handler(ioc, [&]() { s.stop(); });
 
-  fmt::println("listening on {}:{}", c.host_, c.port_);
+  fmt::println("listening on {}:{}", server_config.host_, server_config.port_);
   net::run(ioc)();
 
   workers.stop();
@@ -96,30 +116,45 @@ int server(fs::path data_path, config const& c) {
   return 0;
 }
 
-int main(int ac, char const** av) {
-  constexpr auto const kDefaultMode = "server";
-  auto const subcommand =
-      ac <= 1U ? std::string_view{kDefaultMode} : std::string_view{av[1]};
+int import(int ac, char** av) {
+  auto config_path = fs::path{"config.ini"};
+  auto data_path = fs::path{"data"};
+
+  auto desc = bpo::options_description{"Options"};
+  desc.add_options()  //
+      ("help,h", "produce this help message")  //
+      ("config,c", bpo::value(&config_path)->default_value(config_path),
+       "configuration file")  //
+      ("data,d", bpo::value(&data_path)->default_value(data_path), "data path");
+
+  auto vm = bpo::variables_map{};
+  bpo::store(bpo::command_line_parser(ac, av).options(desc).run(), vm);
+  bpo::notify(vm);
+
+  auto c = config{};
+  try {
+    c = config::read(config_path);
+    import(c, std::move(data_path));
+  } catch (std::exception const& e) {
+    fmt::println("unable to import: {}", e.what());
+    fmt::println("config:\n{}", fmt::streamed(c));
+    return 1;
+  }
+
+  return 0;
+}
+
+int main(int ac, char** av) {
+  auto const subcommand = std::string_view{ac <= 1 ? "server" : av[1]};
+
+  if (ac > 1) {
+    --ac;
+    ++av;
+  }
 
   if (subcommand == "server") {
-    struct flags {
-      utl::cmd_line_flag<fs::path,
-                         UTL_SHORT("-d"),
-                         UTL_LONG("--data_path"),
-                         UTL_DESC("data path")>
-          data_path_{"data"};
-      utl::cmd_line_flag<fs::path,
-                         UTL_SHORT("-c"),
-                         UTL_LONG("--config"),
-                         UTL_DESC("target file")>
-          config_path_{"config.ini"};
-      utl::cmd_line_flag<std::size_t,
-                         UTL_LONG("--num_threads"),
-                         UTL_DESC("thread pool size")>
-          n_threads_{std::thread::hardware_concurrency()};
-    };
-    auto const f = utl::parse_flags<flags>(ac - 1, av + 1);
-    return server(std::move(*f.data_path_), config::read(*f.config_path_));
-  } else {
+    return server(ac, av);
+  } else if (subcommand == "import") {
+    return import(ac, av);
   }
 }

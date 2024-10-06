@@ -40,9 +40,12 @@ struct data {
   data& operator=(data const&) = delete;
   data& operator=(data&&) = delete;
 
+  friend std::ostream& operator<<(std::ostream&, data const&);
+
   void load_osr();
   void load_tt();
   void load_geocoder();
+  void load_matches();
   void load_reverse_geocoder();
   void load_elevators();
 
@@ -64,7 +67,7 @@ struct data {
   ptr<point_rtree<nigiri::location_idx_t>> location_rtee_;
   ptr<hash_set<osr::node_idx_t>> elevator_nodes_;
   ptr<platform_matches_t> matches_;
-  std::shared_ptr<rt> rt_;
+  std::shared_ptr<rt> rt_{std::make_shared<rt>()};
 };
 
 }  // namespace motis
