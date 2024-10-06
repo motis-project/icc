@@ -9,7 +9,7 @@
 [osr]
   url=git@github.com:motis-project/osr.git
   branch=master
-  commit=a0ab3c1cb8ce5170c2b00de49175ef184489b047
+  commit=c1e764df7f5674551b571ca0c87b3200fbcdaa6a
 [utl]
   url=git@github.com:motis-project/utl.git
   branch=master
@@ -37,4 +37,4 @@
 [reflect-cpp]
   url=git@github.com:motis-project/reflect-cpp.git
   branch=main
-  commit=8de822c302e6592c657468bbe804626227e16c56
+  commit=0c34a23ab48f33da82af7862761a999a64b7506d

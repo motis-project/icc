@@ -5,6 +5,8 @@
 #include "osr/geojson.h"
 #include "osr/routing/route.h"
 
+#include "motis/data.h"
+
 namespace json = boost::json;
 
 namespace motis::ep {

@@ -24,4 +24,5 @@ struct offset;
 
 namespace motis {
 struct tiles_data;
-}
+struct rt;
+}  // namespace motis

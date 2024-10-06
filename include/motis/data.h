@@ -25,6 +25,9 @@ template <typename T>
 using ptr = std::unique_ptr<T>;
 
 struct rt {
+  rt();
+  rt(ptr<nigiri::rt_timetable>&&, ptr<elevators>&&);
+  ~rt();
   ptr<nigiri::rt_timetable> rtt_;
   ptr<elevators> e_;
 };

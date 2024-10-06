@@ -31,6 +31,13 @@ namespace n = nigiri;
 
 namespace motis {
 
+rt::rt() = default;
+
+rt::rt(ptr<nigiri::rt_timetable>&& rtt, ptr<elevators>&& e)
+    : rtt_{std::move(rtt)}, e_{std::move(e)} {}
+
+rt::~rt() = default;
+
 std::ostream& operator<<(std::ostream& out, data const& d) {
   return out << "\nt=" << d.t_.get() << "\narea_db=" << d.area_db_
              << "\nr=" << d.r_ << "\ntc=" << d.tc_ << "\nw=" << d.w_
