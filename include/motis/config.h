@@ -56,7 +56,7 @@ struct config {
                              : 256U * 1024U * 1024U};
     std::size_t flush_threshold_{sizeof(void*) >= 8 ? 10'000'000 : 100'000};
   };
-  std::optional<tiles> tiles_;
+  std::optional<tiles> tiles_{};
 
   struct timetable {
     struct dataset {

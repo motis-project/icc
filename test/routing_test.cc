@@ -269,7 +269,7 @@ FFM,50.10701,8.66341,06:15-22:30
   nl::finalize(tt);
 
   fmt::println("computing footpaths");
-  auto const elevator_footpath_map = compute_footpaths(tt, w, l, pl, true);
+  auto const elevator_footpath_map = compute_footpaths(w, l, pl, tt, true);
 
   fmt::println("writing elevator footpaths");
   write(data_path / "elevator_footpath_map.bin", elevator_footpath_map);
