@@ -4,6 +4,7 @@
 
 #include "fmt/std.h"
 
+#include "utl/erase.h"
 #include "utl/read_file.h"
 #include "utl/verify.h"
 
@@ -51,6 +52,28 @@ private:
 
 std::ostream& operator<<(std::ostream& out, config const& c) {
   return out << rfl::yaml::write<drop_trailing>(c);
+}
+
+config config::read_simple(std::vector<std::string> const& args) {
+  auto c = config{};
+  for (auto const& arg : args) {
+    auto const p = fs::path{arg};
+    utl::verify(fs::is_regular_file(p), "path {} does not exist", p);
+    if (p.generic_string().ends_with("osm.pbf")) {
+      c.osm_ = p;
+      c.street_routing_ = true;
+      c.geocoding_ = true;
+    } else {
+      if (!c.timetable_.has_value()) {
+        c.timetable_ = {timetable{}};
+      }
+
+      auto tag = p.stem().generic_string();
+      utl::erase(tag, '_');
+      c.timetable_->datasets_.emplace(tag, p);
+    }
+  }
+  return c;
 }
 
 config config::read(std::filesystem::path const& p) {
