@@ -33,6 +33,7 @@ struct config {
     bool operator==(server const&) const = default;
     std::string host_{"0.0.0.0"};
     std::string port_{"8080"};
+    std::string web_folder_{"ui"};
     unsigned n_threads_{std::thread::hardware_concurrency()};
   };
   std::optional<server> server_{};

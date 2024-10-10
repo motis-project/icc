@@ -1,13 +1,9 @@
 #include "motis/config.h"
 
 #include <iostream>
-#include <regex>
-
-#include "boost/program_options.hpp"
 
 #include "fmt/std.h"
 
-#include "utl/parser/split.h"
 #include "utl/read_file.h"
 #include "utl/verify.h"
 
@@ -126,10 +122,61 @@ bool config::requires_rt_timetable_updates() const {
          });
 }
 
+}  // namespace motis
+
+// ====================
+//   BELOW THIS LINE:
+// LEGACY CONFIG FORMAT
+// CODE WILL BE REMOVED
+//    IN THE FUTURE!
+// --------------------
+
+#include <regex>
+
+#include "boost/program_options.hpp"
+
+#include "utl/parser/split.h"
+
+namespace std {  // NOLINT(cert-dcl58-cpp)
+
+template <typename T>
+ostream& operator<<(ostream& out, vector<T> const& v) {
+  for (auto i = 0U; i < v.size(); ++i) {
+    if (i != 0) {
+      out << ", ";
+    }
+    out << v[i];
+  }
+  return out;
+}
+
+}  // namespace std
+
+namespace motis {
+
+template <typename T>
+struct is_vector {
+  static bool const value = false;
+};
+template <typename T>
+struct is_vector<std::vector<T>> {
+  static bool const value = true;
+};
+
 config config::read_legacy(fs::path const& p) {
+  std::cerr << "WARNING: Using legacy INI configuration format.\n"
+               "This feature will be removed in the future.\n";
+
   namespace po = boost::program_options;
 
   struct options {
+    // launcher
+    unsigned num_threads_{std::thread::hardware_concurrency()};
+
+    // server
+    std::string host_{"0.0.0.0"}, port_{"8080"};
+    std::string static_path_;
+
     // import
     std::vector<std::string> import_paths_;
     std::string data_directory_{"data"};
@@ -160,20 +207,42 @@ config config::read_legacy(fs::path const& p) {
     bool gtfsrt_incremental_{false};
     bool debug_{false};
     bool bikes_allowed_default_{false};
+
+    // tiles
+    bool use_coastline_{false};
+    std::string profile_path_;
+    size_t db_size_{sizeof(void*) >= 8 ? 1024ULL * 1024 * 1024 * 1024
+                                       : 256 * 1024 * 1024};
+    size_t flush_threshold_{sizeof(void*) >= 8 ? 10'000'000 : 100'000};
   } cfg;
 
   auto prefix = std::string{};
   auto desc = po::options_description{"Global options"};
   auto const param = [&](auto& ref, std::string const& name,
                          std::string const& doc) {
-    auto val = po::value<std::decay_t<decltype(ref)>>(&ref)->default_value(ref);
-    desc.add_options()  //
-        ((prefix + "." + name).c_str(), std::move(val), doc.c_str());
+    using T = std::decay_t<decltype(ref)>;
+    if constexpr (is_vector<T>::value) {
+      auto val = po::value<T>(&ref)->default_value(ref)->multitoken();
+      desc.add_options()  //
+          (prefix.empty() ? name.c_str() : (prefix + "." + name).c_str(),
+           std::move(val), doc.c_str());
+    } else {
+      auto val = po::value<T>(&ref)->default_value(ref);
+      desc.add_options()  //
+          (prefix.empty() ? name.c_str() : (prefix + "." + name).c_str(),
+           std::move(val), doc.c_str());
+    }
   };
 
   prefix = "";
   param(cfg.modules_, "modules", "List of modules to load");
   param(cfg.exclude_modules_, "exclude_modules", "List of modules to exclude");
+  param(cfg.num_threads_, "num_threads", "number of worker threads");
+
+  prefix = "server";
+  param(cfg.host_, "host", "host (e.g. 0.0.0.0 or localhost)");
+  param(cfg.port_, "port", "port (e.g. https or 8443)");
+  param(cfg.static_path_, "static_path", "path to ui/web (compiled)");
 
   prefix = "import";
   param(cfg.import_paths_, "paths",
@@ -212,6 +281,13 @@ config config::read_legacy(fs::path const& p) {
         "whether bikes are allowed in trips where no information is "
         "available");
 
+  prefix = "tiles";
+  param(cfg.use_coastline_, "import.use_coastline", "true|false");
+  param(cfg.flush_threshold_, "import.flush_threshold",
+        "shared metadata max queue size");
+  param(cfg.profile_path_, "profile", "/path/to/profile.lua");
+  param(cfg.db_size_, "db_size", "database size");
+
   auto ifs = std::ifstream{p};
   if (!ifs) {
     throw utl::fail("could not open file {}", p);
@@ -238,7 +314,6 @@ config config::read_legacy(fs::path const& p) {
       utl::verify(std::regex_match(import_path, m, re) && m.size() == 4,
                   "import_path does not match tag-options:path : {}",
                   import_path);
-      utl::verify(fs::exists(m.str(3)), "file does not exist: {}", m.str(3));
       return {m.str(1), m.str(2), m.str(3)};
     }
   };
@@ -246,12 +321,16 @@ config config::read_legacy(fs::path const& p) {
   auto const is_module_active = [&](std::string const& module) {
     auto const& yes = cfg.modules_;
     auto const& no = cfg.exclude_modules_;
-    return std::find(begin(yes), end(yes), module) != end(yes) &&
-           std::find(begin(no), end(no), module) == end(no);
+    return utl::find(yes, module) != end(yes) &&
+           utl::find(no, module) == end(no);
   };
 
   auto c = config{};
 
+  c.server_ = {{.host_ = cfg.host_,
+                .port_ = cfg.port_,
+                .web_folder_ = cfg.static_path_,
+                .n_threads_ = cfg.num_threads_}};
   c.timetable_ = is_module_active("nigiri")
                      ? std::optional{timetable{
                            .first_day_ = cfg.first_day_,
@@ -270,7 +349,12 @@ config config::read_legacy(fs::path const& p) {
   c.street_routing_ = is_module_active("osr") || is_module_active("osrm") ||
                       is_module_active("ppr");
   c.geocoding_ = is_module_active("adr");
-  c.tiles_ = is_module_active("tiles") ? std::optional{tiles{}} : std::nullopt;
+  c.tiles_ =
+      is_module_active("tiles")
+          ? std::optional{tiles{.profile_ = cfg.profile_path_,
+                                .db_size_ = cfg.db_size_,
+                                .flush_threshold_ = cfg.flush_threshold_}}
+          : std::nullopt;
 
   for (auto const& x : cfg.import_paths_) {
     auto const [type, tag, path] = split_import_path(x);
@@ -278,14 +362,14 @@ config config::read_legacy(fs::path const& p) {
       c.timetable_->datasets_[tag].path_ = path;
     } else if (type == "osm") {
       c.osm_ = path;
-    } else if (type == "coastline" && c.tiles_.has_value()) {
-      c.tiles_ = config::tiles{};
+    } else if (type == "coastline" && cfg.use_coastline_ &&
+               c.tiles_.has_value()) {
       c.tiles_->coastline_ = path;
     }
   }
 
   if (c.timetable_.has_value()) {
-    for (auto const& rt : cfg.gtfsrt_paths_) {
+    for (auto const& rt : cfg.gtfsrt_urls_) {
       auto const [tag, url, auth] =
           utl::split<'|', utl::cstr, utl::cstr, utl::cstr>(rt);
       auto const it = c.timetable_->datasets_.find(tag.to_str());
@@ -298,7 +382,7 @@ config config::read_legacy(fs::path const& p) {
       auto& entry =
           rts->emplace_back(timetable::dataset::rt{.url_ = url.to_str()});
       if (!auth.empty()) {
-        entry.headers_->emplace("Authorization", auth.to_str());
+        entry.headers_ = {{"Authorization", auth.to_str()}};
       }
     }
   }
