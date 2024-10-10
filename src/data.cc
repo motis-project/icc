@@ -54,7 +54,7 @@ data::data(std::filesystem::path p) : path_{std::move(p)} {}
 data::data(std::filesystem::path p, config const& c) : path_{std::move(p)} {
   rt_ = std::make_shared<rt>();
 
-  auto geocoder = std::async([&]() {
+  auto geocoder = std::async(std::launch::async, [&]() {
     if (c.geocoding_) {
       load_geocoder();
     }
@@ -63,45 +63,45 @@ data::data(std::filesystem::path p, config const& c) : path_{std::move(p)} {
     }
   });
 
-  auto tt = std::async([&]() {
+  auto tt = std::async(std::launch::async, [&]() {
     if (c.timetable_) {
       load_tt();
     }
   });
 
-  auto street_routing = std::async([&]() {
+  auto street_routing = std::async(std::launch::async, [&]() {
     if (c.street_routing_) {
       load_osr();
     }
   });
 
-  auto matches = std::async([&]() {
+  auto matches = std::async(std::launch::async, [&]() {
     if (c.street_routing_ && c.timetable_) {
       load_matches();
     }
   });
 
-  auto elevators = std::async([&]() {
-    tt.get();
-    street_routing.get();
-    matches.get();
+  auto elevators = std::async(std::launch::async, [&]() {
+    tt.wait();
+    street_routing.wait();
+    matches.wait();
     if (c.elevators_) {
       load_elevators();
     }
   });
 
-  auto tiles = std::async([&]() {
+  auto tiles = std::async(std::launch::async, [&]() {
     if (c.tiles_) {
       load_tiles();
     }
   });
 
-  geocoder.get();
-  tt.get();
-  street_routing.get();
-  matches.get();
-  elevators.get();
-  tiles.get();
+  geocoder.wait();
+  tt.wait();
+  street_routing.wait();
+  matches.wait();
+  elevators.wait();
+  tiles.wait();
 }
 
 data::~data() = default;
