@@ -128,7 +128,8 @@ cista::hash_t hash_file(fs::path const& p) {
       cista::mmap{p.generic_string().c_str(), cista::mmap::protection::READ};
   return cista::hash_combine(
       cista::hash(mmap.view().substr(
-          0ZU, std::min(mmap.size(), 50ZU * 1024ZU * 1024ZU))),
+          0ZU, std::min(mmap.size(),
+                        static_cast<std::size_t>(50U * 1024U * 1024U)))),
       mmap.size());
 }
 
