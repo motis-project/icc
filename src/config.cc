@@ -327,10 +327,10 @@ config config::read_legacy(fs::path const& p) {
 
   auto c = config{};
 
-  c.server_ = {{.host_ = cfg.host_,
-                .port_ = cfg.port_,
-                .web_folder_ = cfg.static_path_,
-                .n_threads_ = cfg.num_threads_}};
+  c.server_ = {server{.host_ = cfg.host_,
+                      .port_ = cfg.port_,
+                      .web_folder_ = cfg.static_path_,
+                      .n_threads_ = cfg.num_threads_}};
   c.timetable_ = is_module_active("nigiri")
                      ? std::optional{timetable{
                            .first_day_ = cfg.first_day_,
