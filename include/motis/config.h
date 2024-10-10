@@ -18,6 +18,7 @@ using headers_t = std::map<std::string, std::string>;
 
 struct config {
   friend std::ostream& operator<<(std::ostream&, config const&);
+  static config read_legacy(std::filesystem::path const&);
   static config read(std::filesystem::path const&);
   static config read(std::string const&);
 
