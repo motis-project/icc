@@ -70,7 +70,7 @@ config config::read_simple(std::vector<std::string> const& args) {
 
       auto tag = p.stem().generic_string();
       utl::erase(tag, '_');
-      c.timetable_->datasets_.emplace(tag, p);
+      c.timetable_->datasets_.emplace(tag, timetable::dataset{.path_ = p});
     }
   }
   return c;
